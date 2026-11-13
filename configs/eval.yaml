@@ -1,0 +1,34 @@
+# Invariant 5: identical across conditions.
+model: CohereLabs/tiny-aya-global
+model_revision: af89d219b53ed9b13b8a4645f9c8028973510324   # pinned from the M0 smoke job
+generation:
+  backend: vllm   # vLLM 0.33 verified 2026-11-11: ~6x HF throughput, LoRA OK, greedy agrees with HF for the first
+                  # 8-260 tokens then drifts (bf16 kernels). Condition C (SafeTune hooks) needs HF: backend hf,
+                  # compared against an A run that also uses hf.
+decoding:
+  do_sample: false
+  max_new_tokens: 384
+  max_len: 8192   # spec said 3,072; smoke runs truncated 3/8 long XGuard histories (incl. the system prompt). 8,192 = model limit. See docs/RUNS.md
+system_prompts:
+  default: prompts/system_A.txt
+  B: prompts/system_B.txt
+judges:
+  primary: meta-llama/Llama-Guard-3-8B
+  backtranslate_languages: [hi, hinglish, bn]   # hi/bn via NLLB, hinglish via base Tiny Aya (runner.py)
+  rubric: prompts/judge_rubric.txt
+guard:                        # condition G (Invariant 6: not the judge)
+  model: meta-llama/Llama-Guard-3-1B
+  refusal_text: "I can't help with that request."
+conditions:
+  A:  {system: default}
+  S0: {system: default, final_turn_only: true}
+  B:  {system: B}
+  G:  {system: default, guard: true}
+  C:  {system: default, steering: runs/steer_C}   # steer.json + direction.pt from onegap steer; HF backend
+  D:  {system: default, adapter: runs/train_D/adapter}
+  E:  {system: default, adapter: runs/train_E/adapter}
+  R:  {system: default, adapter: runs/train_R/adapter}
+  F:  {system: default, model: Lexsi/tiny-aya-global-hh-rlhf-aligned}
+stats:
+  bootstrap_resamples: 10000
+  seed: 13

@@ -1,0 +1,28 @@
+# environments
+.venv/
+.venv-*/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# data and runs (runs/ is pushed to the HF dataset, never to git)
+runs/
+data/raw/
+data/generated/*.tmp
+# data/generated holds XGuard-Train text (gated, no licence) and Cohere cache: never commit.
+# Jobs get these files through the PRIVATE working repo (launch_job.py --inputs). The Cohere call ledger also
+# stays local (it changes on every call, which would block the commit-before-launch rule); totals go in RUNS.md.
+data/generated/*
+*.safetensors
+*.bin
+wandb/
+
+# secrets
+.env
+*.token
+
+# job bundles
+dist/
+build/
+*.tar.gz

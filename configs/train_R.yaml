@@ -1,0 +1,16 @@
+condition: R
+shared:
+  lora: {r: 16, alpha: 32, dropout: 0.05}
+  dpo: {beta: 0.1}
+  lr: 5.0e-6
+  epochs: 2
+  effective_batch: 16
+  max_length: 3072
+  max_prompt_length: 2688
+  bf16: true
+  seed: 13
+  data: data/generated/prefpairs_train.jsonl
+target:
+  mode: random                # same count per module type as E, excluding E's set
+  match: runs/circuits/selected_components.json
+  seed: 13

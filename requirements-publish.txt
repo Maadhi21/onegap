@@ -1,0 +1,6 @@
+# .venv-publish: CPU job that builds the public copies and uploads them (onegap publish-hub). No torch.
+huggingface_hub
+pyyaml
+numpy
+scipy
+-e .

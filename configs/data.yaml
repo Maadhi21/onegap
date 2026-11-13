@@ -1,0 +1,23 @@
+seed: 13
+languages: {train: [en, hi, hinglish], held_out: [bn]}
+categories: [fraud_scam, cyber_attack, weapons_violence, dangerous_drugs, hate_harassment]
+sources:                      # VERIFY each id, config, schema and licence; record in docs/API_NOTES.md
+  train_attacks: {id: marslabucla/XGuard-Train, family: xguard}
+  test_attacks: {id: SafeMTData/SafeMTData, config: Attack_600, family: actorattack, min_turns: 3, max_turns: 6}
+  overrefusal: {id: null, family: xstest}            # VERIFY XSTest HF id
+  mmlu: {id: CohereLabs/Global-MMLU, languages: [en, hi]}
+  flores: {id: null, pairs: [en-hi, en-bn]}          # VERIFY (gated FLORES+)
+sizes:
+  train: {attack_seeds: 400, benign_per_lang: 400}
+  dev: {attack_per_lang: 40, benign_per_lang: 30, overrefusal_per_lang: 50}
+  test: {attack_per_lang: 100, benign_per_lang: 80, overrefusal_per_lang: 150}
+  capability: {mmlu_per_lang: 300, flores_per_dir: 200, ifeval: 100}
+translation:
+  model: facebook/nllb-200-distilled-1.3B
+  fallback: ai4bharat/indictrans2-en-indic-1B
+codemix:
+  backend: cohere              # model id chosen and recorded at M1
+  variants: 2
+fidelity_gate:
+  min_cosine: 0.80
+  hinglish_min_hindi_lexicon: 0.25

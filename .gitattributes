@@ -1,0 +1,5 @@
+# Jobs run on Linux: keep LF everywhere (a CRLF job_entry.sh breaks bash).
+* text=auto eol=lf
+*.png binary
+*.pdf binary
+*.safetensors binary

@@ -1,0 +1,15 @@
+# Invariant 4: train_D / train_E / train_R differ ONLY in `target`.
+condition: D
+shared: &shared
+  lora: {r: 16, alpha: 32, dropout: 0.05}
+  dpo: {beta: 0.1}            # dev sweep {0.05, 0.1} only
+  lr: 5.0e-6
+  epochs: 2
+  effective_batch: 16
+  max_length: 3072
+  max_prompt_length: 2688
+  bf16: true
+  seed: 13
+  data: data/generated/prefpairs_train.jsonl
+target:
+  mode: all-linear

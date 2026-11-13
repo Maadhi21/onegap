@@ -1,0 +1,16 @@
+# .venv-core (Python 3.12). Installed inside HF Jobs only. Exact freeze saved per run (pip-freeze-core.txt).
+torch>=2.7
+transformers>=5.15,<6
+accelerate
+peft
+trl<1.15
+datasets
+huggingface_hub
+sentencepiece
+sentence-transformers
+safetune==0.1.14
+curatorkit==0.1.24
+pyyaml
+numpy
+scipy
+-e .

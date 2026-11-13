@@ -1,0 +1,11 @@
+condition: C
+method: refusal_direction     # CASTTrainer is a stretch arm only
+layer: null                   # from circuit layer_suggestions; else ~24 of 36
+calibration: train            # train prompts only
+strength_sweep: [0.5, 1.0, 1.5, 2.0, 3.0, 4.0]
+target: match_D_refusal_gain_on_dev
+strength_unit: mean_diff_norm      # strengths are multiples of ||mean(harmful)-mean(harmless)|| at the layer (steer.py)
+target_gain: null                  # D's dev attack-refusal gain over A; filled after D's dev run
+n_calibration: 96
+sweep_attack_per_lang: 8
+sweep_overref_per_lang: 10

@@ -1,0 +1,15 @@
+box_hours: 4
+smoke: {task: mmlu, algorithm: eap-ig, n_examples: 16, sparsity: 0.3, box_minutes: 30}
+task:
+  languages: [en, hi, hinglish]
+  pairs_per_language: 48
+  history_turns: 2            # keep short for memory
+  metric: logit_difference
+discover: {algorithm: eap-ig, fallback: eap, level: node, sparsities: [0.1, 0.2, 0.3]}
+faithfulness: {pillars: [patching, ablation, baselines], min_patching_recovery: 0.75}
+overlap: {top_k: 36, metric: jaccard}
+select: {top_k_nodes: 36, max_blocks_per_kind: 9}
+# top_k_nodes: overlap report only. E = walk nodes by score, add each node's block until 9/36 attention and 9/36 MLP
+# layers (a quarter of each block type); plain top-36 spanned 21/36 MLP layers in the smoke (MLP nodes are whole
+# blocks and outscore heads), leaving no room for a disjoint random control R.
+fallback: safetune_circuitinfo_plus_ck_wmdp

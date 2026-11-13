@@ -1,0 +1,4 @@
+# .venv-audit
+auditkit[lmeval]==1.1.7
+pyyaml
+-e .

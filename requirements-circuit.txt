@@ -1,0 +1,7 @@
+# .venv-circuit. CircuitKIT from PyPI (source fallback: github.com/Lexsi-Labs/circuitkit).
+# Spec mentions transformer-lens 3.8.0; left to circuitkit's own resolution, recorded in pip-freeze-circuit.txt.
+# Import circuitkit before transformer_lens. Discovery needs CUDA.
+torch
+circuitkit==0.2.2
+pyyaml
+-e .

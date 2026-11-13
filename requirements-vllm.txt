@@ -1,0 +1,10 @@
+# .venv-vllm (Python 3.12). Installed inside HF Jobs only. vLLM pins its own torch/transformers; the exact
+# freeze is saved per run (pip-freeze-vllm.txt). VERIFY results go to docs/API_NOTES.md.
+vllm
+peft
+sentencepiece
+sentence-transformers
+pyyaml
+numpy
+scipy
+-e .
