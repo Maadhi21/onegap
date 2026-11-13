@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OneGap replay</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<style>
+  :root { --fg:#1d2329; --muted:#6b7480; --bg:#ffffff; --line:#dde2e7; --accent:#2c6fbb; }
+  @media (prefers-color-scheme: dark) { :root { --fg:#e6e9ec; --muted:#9aa4ae; --bg:#14181c; --line:#2c333a; --accent:#6aa3e8; } }
+  body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width:1100px; margin:0 auto; padding:16px; }
+  h1 { font-size:1.45em; margin:0.2em 0; }
+  .sub { color:var(--muted); margin:0 0 12px; }
+  nav button { background:none; border:none; border-bottom:2px solid transparent; color:var(--fg); padding:8px 12px; cursor:pointer; font-size:1em; }
+  nav button.on { border-color:var(--accent); font-weight:600; }
+  nav { border-bottom:1px solid var(--line); margin-bottom:14px; }
+  .row { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:12px; }
+  label { display:flex; flex-direction:column; font-size:0.85em; color:var(--muted); }
+  select { font-size:1rem; padding:4px; max-width:100%; background:var(--bg); color:var(--fg); border:1px solid var(--line); border-radius:4px; }
+  #conv { min-width:min(560px, 100%); }
+  #view { overflow-x:auto; }
+  #view table td, #view table th { border-bottom:1px solid var(--line); }
+  .tab { display:none; } .tab.on { display:block; }
+  img { max-width:100%; height:auto; margin:8px 0 18px; background:white; border-radius:4px; }
+  .md table { border-collapse:collapse; font-size:0.85em; display:block; overflow-x:auto; }
+  .md td, .md th { border:1px solid var(--line); padding:3px 6px; }
+  details { margin:10px 0; } summary { cursor:pointer; font-weight:600; }
+</style>
+</head>
+<body>
+<main>
+  <h1>OneGap: does Tiny Aya's safety hold across languages and turns?</h1>
+  <p class="sub">Replay of the published, judged transcripts. Pick a conversation to see each condition's label per turn. Nothing is generated live.</p>
+  <nav>
+    <button data-tab="t-conv" class="on">Conversations</button>
+    <button data-tab="t-res">Results</button>
+    <button data-tab="t-about">About</button>
+  </nav>
+
+  <section id="t-conv" class="tab on">
+    <div class="row">
+      <label>split<select id="split">
+        <option value="dev">dev (40 attacks per language, all conditions)</option>
+        <option value="test">held-out test (single prompt only)</option>
+      </select></label>
+      <label>language<select id="lang">
+        <option value="en">English</option><option value="hi">Hindi</option>
+        <option value="hinglish" selected>Hinglish</option><option value="bn">Bengali (never trained)</option>
+      </select></label>
+      <label>kind<select id="kind"></select></label>
+    </div>
+    <div class="row"><label>conversation<select id="conv"></select></label></div>
+    <div id="view"></div>
+  </section>
+
+  <section id="t-res" class="tab">
+    <div id="figs"></div>
+    <details><summary>Dev report (all tables)</summary><div class="md" id="dev-md"></div></details>
+    <details><summary>Held-out report</summary><div class="md" id="test-md"></div></details>
+  </section>
+
+  <section id="t-about" class="tab"><div class="md" id="about"></div></section>
+</main>
+<script>
+const KIND = {attack: "attack (multi-turn jailbreak)", benign: "harmless conversation",
+              overrefusal: "harmless prompt that sounds risky"};
+const FIGS = ["heldout_single_prompt", "single_vs_conversation", "first_failure", "repairs", "edit_size"];
+const cache = {};
+const $ = (id) => document.getElementById(id);
+
+async function getJSON(path) {
+  if (!cache[path]) cache[path] = fetch(path).then((r) => { if (!r.ok) throw new Error(path); return r.json(); });
+  return cache[path];
+}
+
+async function fillKinds() {
+  const file = await getJSON(`data/${$("split").value}-${$("lang").value}.json`).catch(() => ({}));
+  const prev = $("kind").value;
+  $("kind").innerHTML = Object.keys(file).map((k) =>
+    `<option value="${k}">${KIND[k] || k} (${file[k].length})</option>`).join("");
+  if (file[prev]) $("kind").value = prev;
+  fillConvs(file);
+}
+
+function fillConvs(file) {
+  const items = file[$("kind").value] || [];
+  $("conv").innerHTML = items.map((it, i) => `<option value="${i}"></option>`).join("");
+  [...$("conv").options].forEach((o, i) => { o.textContent = items[i].label; });
+  show(items);
+}
+
+function show(items) {
+  const it = items[Number($("conv").value)];
+  $("view").innerHTML = it ? it.html : "<p>No conversation for this choice.</p>";  // pre-rendered and escaped at build
+}
+
+async function current() {
+  return getJSON(`data/${$("split").value}-${$("lang").value}.json`).catch(() => ({}));
+}
+
+$("split").addEventListener("change", fillKinds);
+$("lang").addEventListener("change", fillKinds);
+$("kind").addEventListener("change", async () => fillConvs(await current()));
+$("conv").addEventListener("change", async () => show((await current())[$("kind").value] || []));
+
+document.querySelectorAll("nav button").forEach((b) => b.addEventListener("click", () => {
+  document.querySelectorAll("nav button").forEach((x) => x.classList.toggle("on", x === b));
+  document.querySelectorAll(".tab").forEach((t) => t.classList.toggle("on", t.id === b.dataset.tab));
+}));
+
+async function md(path, id) {
+  const text = await fetch(path).then((r) => r.text());
+  $(id).innerHTML = window.marked ? marked.parse(text) : `<pre>${text.replace(/[<&]/g, (c) => ({"<": "&lt;", "&": "&amp;"})[c])}</pre>`;
+}
+
+$("figs").innerHTML = FIGS.map((f) => `<img src="figures/${f}.png" alt="${f.replaceAll("_", " ")}">`).join("");
+md("reports/dev_v1.md", "dev-md");
+md("reports/test_v1.md", "test-md");
+md("about.md", "about");
+fillKinds();
+</script>
+</body>
+</html>

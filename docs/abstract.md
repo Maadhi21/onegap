@@ -15,6 +15,6 @@ A helpline assistant answers in the user's language. Someone after a scam script
 
 **How.** Attacks come from XGuard-Train (train, dev) and SafeMTData `Attack_600` (held-out test, a different attack family). Hindi and Bengali come from NLLB, Hinglish from a Cohere model, behind a back-translation gate; Bengali is never trained on. Every assistant turn is generated live and judged by Llama Guard 3 8B. We report Wilson intervals, paired bootstraps and McNemar tests; the D/E/R rule was committed before any result.
 
-**What is public.** Code, tests and the full run log, failures included; the three adapters; per-turn labels and manifests for every run; the circuits. Unsafe model text is replaced by hashed markers.
+**What is public.** Code, tests and the full run log, failures included; the three adapters; per-turn labels and manifests for every run; the circuits; a replay Space and a CPU notebook that rebuilds every table. Unsafe text is hashed.
 
 **Limits and next.** Everything ran on a $20 compute credit. No human has audited the judge or the translations. Next, if shortlisted: the multi-turn run and the defences on the held-out set, a revised repair recipe, and a guard-model baseline.

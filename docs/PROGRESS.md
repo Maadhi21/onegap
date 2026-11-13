@@ -319,5 +319,18 @@ multi-turn uplift on test is not measured.
 ## M9 — Final submission — 2026-11-13
 - [x] Article (final version: held-out section in 7.1, notice, costs, limits, section 8), abstract (under 500
       words), README status and held-out table, cards regenerated (`make_cards.py --test-report`)
-- [ ] Hub update (S0 test run, test report, cards) from the dev box; GitHub push of the same commit
-- [ ] Article posted, form submitted (HUMAN: Madhava)
+- [x] Hub update (S0 test run, test report, cards) from the dev box; GitHub push of the same commit
+      (13 Nov 11:14, `runs_local/final.log`: `UPLOADED`, `PUSHED b7c2143`; checked logged out 13 Nov: GitHub main =
+      b7c2143, four HF repos public and un-gated, held-out run and `report/test_v1.*` present)
+- [x] Reproduction notebook `notebooks/reproduce_headline.ipynb` (13 Nov): downloads the published runs, rebuilds
+      dev_v1 and test_v1 with `onegap.report`, all 10 compared blocks equal the published reports, held-out
+      language gaps match (refused: hi −12.4, Hinglish −10.8, bn −11.8 points; unsafe bn +7.5, p = 0.039), five
+      figures (`onegap.figures`). Executed on CPU with outputs saved.
+- [x] Replay Space [`maadhi/onegap-replay`](https://huggingface.co/spaces/maadhi/onegap-replay) (13 Nov), public.
+      **Deviation:** a Gradio Space was refused (HTTP 402: Gradio/Docker Spaces need PRO even on cpu-basic), so it
+      is a free static Space whose pages are pre-rendered by `space/build_static.py` from the published dataset
+      (never from local runs). Redaction scan passed on `space/` and the built `space/dist/`; no hash marker
+      left in 821 rendered pages. Not yet clicked through in a browser (no browser in this session).
+- [x] Video script and asset pack rewritten to the real results (no repair claim); numbers filled from
+      `runs/report/video_numbers.json` (`onegap.figures`), 9 frames, ≤ 300 spoken words; demo item `a600-0083`.
+- [ ] Article posted, form submitted, video recorded (HUMAN: Madhava)

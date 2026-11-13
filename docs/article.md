@@ -19,7 +19,7 @@ circuit behind refusal, and a pre-registered test of where to repair it.*
    how to read it.** The first recipe was too weak to move the model in any arm. Section 8 is the run that answers
    the question.
 
-Links: [model collection](https://huggingface.co/collections/maadhi/onegap-models-6af5c33bccce0ed5679987fd) · [dataset collection](https://huggingface.co/collections/maadhi/onegap-data-6af5c33b806eb7b1dd105b9a) · [code](https://github.com/Maadhi21/onegap)
+Links: [model collection](https://huggingface.co/collections/maadhi/onegap-models-6af5c33bccce0ed5679987fd) · [dataset collection](https://huggingface.co/collections/maadhi/onegap-data-6af5c33b806eb7b1dd105b9a) · [code](https://github.com/Maadhi21/onegap) · [replay Space](https://huggingface.co/spaces/maadhi/onegap-replay) · [reproduction notebook](https://github.com/Maadhi21/onegap/blob/main/notebooks/reproduce_headline.ipynb)
 
 ---
 

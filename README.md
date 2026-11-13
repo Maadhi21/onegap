@@ -134,8 +134,10 @@ report these numbers as they are, and let E against R on held-out data decide wh
 | Models ([collection](https://huggingface.co/collections/maadhi/onegap-models-6af5c33bccce0ed5679987fd)) | [E, circuit blocks](https://huggingface.co/maadhi/onegap-tiny-aya-global-circuit-lora) · [D, every layer](https://huggingface.co/maadhi/onegap-tiny-aya-global-plain-lora) · [R, random blocks](https://huggingface.co/maadhi/onegap-tiny-aya-global-random-lora) |
 | Data ([collection](https://huggingface.co/collections/maadhi/onegap-data-6af5c33b806eb7b1dd105b9a)) | [transcript labels, manifests, training logs, report](https://huggingface.co/datasets/maadhi/onegap-transcripts-and-logs) · [refusal circuits](https://huggingface.co/datasets/maadhi/onegap-circuits) |
 | Write-up | [`docs/article.md`](docs/article.md), abstract in [`docs/abstract.md`](docs/abstract.md) |
+| Replay demo | [Space `maadhi/onegap-replay`](https://huggingface.co/spaces/maadhi/onegap-replay): per-turn labels for every published conversation and condition, results, about (static, read-only) |
+| Reproduction notebook | [`notebooks/reproduce_headline.ipynb`](notebooks/reproduce_headline.ipynb): downloads the published runs, rebuilds the dev and held-out reports, checks them against the published ones, redraws the figures. CPU only, runs on free Kaggle or Colab; committed with outputs |
 
-To recompute every table from the published labels:
+To recompute every table from the published labels (or open the notebook above):
 
 ```bash
 hf download maadhi/onegap-transcripts-and-logs --repo-type dataset --local-dir pub
@@ -151,6 +153,8 @@ configs/        data sizes, decoding, judges, circuit settings, the three traini
 prompts/        system prompt A (all conditions), prompt B (prompt-only defence), judge rubric
 src/onegap/     data building, multi-turn runner, judges, metrics, statistics, circuits, training, report
 scripts/        HF Jobs launcher and helpers
+notebooks/      reproduce_headline.ipynb (CPU: published runs -> every table and figure)
+space/          the static replay Space (build_static.py renders it from the published dataset)
 tests/          unit tests for everything that runs without a GPU
 docs/           PROGRESS.md (milestones and decisions), RUNS.md (every run, failed ones included),
                 API_NOTES.md (what the toolkit and dataset APIs really look like), article.md, abstract.md
