@@ -150,6 +150,7 @@ def main(argv: list[str] | None = None) -> int:
     sp.add_argument("--attack-replies", choices=["withheld", "redact-unsafe"], default="withheld")
     sp.add_argument("--execute", action="store_true", help="create repos and upload (private unless --public)")
     sp.add_argument("--public", action="store_true")
+    sp.add_argument("--message", default="OneGap: first public version", help="commit message on every repo")
     sp.set_defaults(fn=cmd_publish_hub)
     sp = sub.add_parser("publish-visibility", help="[M9] make the repos in a publish manifest public (or private)")
     sp.add_argument("manifest", type=Path)

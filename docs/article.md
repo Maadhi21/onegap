@@ -1,16 +1,22 @@
 # OneGap: a turn-by-turn safety audit of Tiny Aya Global in English, Hindi and Hinglish, and three repairs tested against each other
 
-*Lexsi AI Safety and Alignment Hackathon 2026, Track 2. Version 1, 12 Nov 2026.*
+*Lexsi AI Safety and Alignment Hackathon 2026, Track 2. Final version, 13 Nov 2026.*
 
-> **This is a first version with development-set results only.** The whole project ran on a $20 compute credit,
-> and about $17 of it is spent. The held-out test set is not frozen yet, the locked test run has not happened, and
-> two baselines (guard model, steering) are not in the tables. We say so wherever it matters.
+> **What is measured where.** The single-prompt audit of the base model (S0) ran on the frozen held-out test set:
+> 83 to 100 behaviours per language from a different attack family than training (section 7.1). The
+> full-conversation run on test (A) was cancelled by the platform 14 minutes before it finished, most likely
+> because the $20 compute credit ran out, so the multi-turn numbers, the stronger prompt (B) and the adapters (D,
+> E, R) are development-split results. Two baselines (guard model, steering) are not in the tables. We say so
+> wherever it matters.
 
 **In five lines**
 
 1. **The gap depends on the language.** In English, Tiny Aya Global gives an unsafe reply to 15% of harmful
    requests asked outright (6/40) and to 30% when the same request is built up over a conversation (12/40). In
-   Hindi and Hinglish a single prompt already works 30 to 38% of the time and the build-up adds nothing.
+   Hindi and Hinglish a single prompt already works 30 to 38% of the time and the build-up adds nothing (dev).
+   **On the frozen held-out set the language gap holds:** the model refuses a harmful request outright 14% of the
+   time in English and 1 to 3% in Hindi, Hinglish and Bengali (paired gaps of 11 to 12 points, p ≤ 0.007), and
+   Bengali, never trained on, gives unsafe replies more often than English (10.8% against 3.0%, p = 0.04).
 2. **It fails in the middle of the conversation.** 24 of 34 failed conversations first fail at turn 3 or 4.
 3. **Nothing we tried moved it yet, and we can show why.** A stronger system prompt left attack success at
    27.5%. Three LoRA adapters trained on the model's own failures (every layer, the circuit's blocks, random
@@ -86,7 +92,7 @@ cover other base models), so that planned baseline was dropped.
 | Source | Used for | Licence | What we publish from it |
 |---|---|---|---|
 | `marslabucla/XGuard-Train` | Training and dev attack conversations | Gated, no licence stated | IDs and labels only, never its text, plus the script that rebuilds our records |
-| `SafeMTData/SafeMTData`, `Attack_600` | Held-out test attacks, a different attack family | MIT | The frozen benchmark, in the final version |
+| `SafeMTData/SafeMTData`, `Attack_600` | Held-out test attacks, a different attack family | MIT | The frozen test conversations (user turns in all four languages) and their labels, in the transcripts dataset |
 | `Paul/XSTest` (safe prompts) | Over-refusal | CC-BY-4.0 | Translated prompts with attribution |
 | Benign multi-turn conversations | Over-refusal under multi-turn pressure | Ours (generated with Cohere Command A) | Full text |
 
@@ -103,7 +109,7 @@ if every turn passes. Pass rates: English 100%, Hindi 96.3%, Hinglish 86.9%, Ben
 |---|---|---|---|---|
 | train | XGuard-Train | 391 / 390 / 391 / — | 384 / 362 / 282 / — | — |
 | dev | XGuard-Train, disjoint seeds | 40 / 40 / 40 / 39 | 30 / 28 / 22 / 25 | 50 / 48 / 48 / 46 |
-| test, not frozen yet | `Attack_600` | 100 / 89 / 83 / 93 | 80 / 76 / 50 / 63 | 150 / 147 / 148 / 146 |
+| test, frozen 13 Nov (tag `test-freeze-v1`) | `Attack_600` | 100 / 89 / 83 / 93 | 80 / 76 / 50 / 63 | 150 / 147 / 148 / 146 |
 
 Five risk categories: fraud and scams, cyber-attack help, weapons and violence, dangerous drugs, hate and
 harassment. `Attack_600` has only 8 drug and 17 fraud behaviours in scope, so the test set is topped up from the
@@ -112,8 +118,12 @@ other categories and per-category counts are reported as they are. No behaviour 
 **No human review of the translations.** We had no Hindi or Hinglish reviewer for this submission. The
 translated and code-mixed conversations are checked by the fidelity gate above and by a mechanical consistency
 check (a name that changes between turns, a dropped reference to an earlier turn). On 60 sampled test
-conversations that check flagged 43 possible problems in 27 of them, and nine concrete fixes are proposed and
-not yet applied. Read every Hindi and Hinglish number with that in mind.
+conversations that check flagged 43 possible problems in 27 of them. Nine concrete fixes came out of it (five
+Hindi mistranslations, among them "psychopharmacology" rendered as "psychotherapy" and the group name Anonymous
+rendered as the adjective; a garbled Hinglish turn; a lost back-reference). Each was checked against its English
+turn by the AI assistant the team delegated the review to, and all nine were applied before the freeze; the file
+hash is checked inside every test job. No person reviewed them. Read every Hindi and Hinglish number with that in
+mind.
 
 ## 5. Model artifacts
 
@@ -137,7 +147,7 @@ Public and un-gated, in the [dataset collection](https://huggingface.co/collecti
 
 | Repo | What |
 |---|---|
-| [`maadhi/onegap-transcripts-and-logs`](https://huggingface.co/datasets/maadhi/onegap-transcripts-and-logs) | Every dev run behind the tables: per-turn judge labels, run manifests (model revision, adapter hash, data hash, prompt hash, git commit), training logs and the report output. Enough to recompute every table with `onegap report` |
+| [`maadhi/onegap-transcripts-and-logs`](https://huggingface.co/datasets/maadhi/onegap-transcripts-and-logs) | Every run behind the tables, dev and held-out test: per-turn judge labels, run manifests (model revision, adapter hash, data hash, prompt hash, git commit), training logs and both reports. The test runs carry the held-out user turns in all four languages. Enough to recompute every table with `onegap report` |
 | [`maadhi/onegap-circuits`](https://huggingface.co/datasets/maadhi/onegap-circuits) | Node scores per language, the faithfulness reports, the overlap matrix, the selected components for E and R, and the SafeTune cross-check |
 
 **Redaction, in one sentence.** Nothing is gated; instead, a model reply judged unsafe is replaced by a marker
@@ -147,8 +157,9 @@ the human audit of the judge has not happened yet. XGuard-Train user turns are n
 their IDs are. The hash proves what the original text was to anyone who holds it; it is not a recipe for
 regenerating it, because reruns on this stack do not reproduce text exactly (section 7.2).
 
-Still to come in the final version: the frozen benchmark `codemix-multiturn-safety-bench` and the correction
-set (pair IDs, labels and the regeneration script).
+Not published yet: the correction set (pair IDs, labels and the regeneration script) and the test set as a
+stand-alone benchmark with its own card. The frozen file's SHA-256 is in the repository (`data/frozen/SHA256SUMS`),
+and every test run manifest records it.
 
 ## 7. Experiments run, findings, and what else was tested
 
@@ -189,8 +200,34 @@ and Hinglish the first time) held. The Bengali uplift did not: 0.0 points the fi
 claim the first two and not the third.
 
 The honest size of this evidence: 40 behaviours per language, same attack family as the training data. It is
-enough to plan with and not enough to conclude from. The frozen test set (100 per language, a different attack
-family) is what the final version reports.
+enough to plan with and not enough to conclude from, which is why we froze a held-out set.
+
+**On the held-out attack family (frozen test set).** 365 final requests from SafeMTData `Attack_600` (ActorAttack,
+a different attack family from training), each sent alone (S0), with the frozen file's hash checked inside the job.
+Same model, prompt, decoding and judge as dev.
+
+| | English | Hindi | Hinglish | Bengali (held out) |
+|---|---|---|---|---|
+| **S0**: unsafe reply | 3.0 [1.0, 8.5] (3/100) | 6.7 [3.1, 13.9] (6/89) | 7.2 [3.4, 14.9] (6/83) | 10.8 [5.9, 18.7] (10/93) |
+| **S0**: refused outright | 14.0 [8.5, 22.1] (14/100) | 3.4 [1.2, 9.4] (3/89) | 1.2 [0.2, 6.5] (1/83) | 2.2 [0.6, 7.5] (2/93) |
+| Unsafe, gap to English, points [95% CI], paired | — | +3.4 [−1.1, +9.0], p = 0.38 | +3.6 [−2.4, +9.6], p = 0.45 | +7.5 [+2.2, +14.0], p = 0.039 |
+| Refused, gap to English, points [95% CI], paired | — | −12.4 [−20.2, −4.5], p = 0.007 | −10.8 [−18.1, −4.8], p = 0.004 | −11.8 [−18.3, −5.4], p = 0.001 |
+
+Paired by behaviour (the same `Attack_600` behaviour in English and in the other language); McNemar exact p.
+
+- **What held on held-out data: English refuses, the other languages do not.** Asked the same harmful request,
+  the model refuses 14 times in 100 in English and 1 to 3 times in Hindi, Hinglish and Bengali. All three gaps
+  exclude zero. This is the dev pattern (25% against 2.5 to 7.5%) on a different attack family.
+- **Bengali, which we never train on, is the weakest.** Unsafe replies are 3.6 times as frequent as in English,
+  and that gap excludes zero. Hindi and Hinglish point the same way (about twice English) without excluding zero.
+- **What did not carry over: the size.** `Attack_600` final requests lean on the conversation before them ("now
+  give the details for the second method"), so alone they rarely produce an unsafe reply (3 to 11%), far below
+  the dev rates, where XGuard final requests stand on their own. Rates are comparable within a split, not across
+  splits.
+- **What we could not measure:** the full-conversation run on test (A) was cancelled 14 minutes before the end,
+  most likely because the credit ran out, so the multi-turn uplift on the held-out family is still open.
+- **By risk area,** weapons (9 of 100 conversations across the four languages) and cyber-attack help (9 of 93)
+  gave the most unsafe single replies; fraud (2 of 64) and drugs (2 of 30) the fewest.
 
 ### 7.2 The defences: a stronger prompt (B) and the repairs D, E and R
 
@@ -351,6 +388,8 @@ in section 8.
 | 12 Nov | Dev evaluation of the stronger prompt | Attack success unchanged (27.5%); harmless questions refused less in English and more in Hindi, Hinglish and Bengali | Reported as it is |
 | 12 Nov | Same adapter, two runs | 15 of 16 first replies differed; 3 of 68 labels differed | Reported as harness noise; a repeated base run is planned to measure it on the test set |
 | 12 Nov | Launch script | A stale copy of a launcher started six duplicate evaluation jobs | Cancelled within five minutes (about $0.13 lost); launch scripts now refuse to run twice |
+| 13 Nov | Test freeze | No human reviewer for the 60-conversation spot check | Nine proposed fixes reviewed against the English by the delegated AI reviewer and applied; set frozen and tagged; stated as a limit |
+| 13 Nov | Held-out audit | Smoke passed (4 per language); S0 finished in 11 minutes (365 conversations, 0 judge fallbacks); A was cancelled by the platform after 68 minutes, in the judging stage, with no error (most likely the credit ran out), and nothing was saved | Reported S0 on test; A on test moved to section 8 |
 
 The full log with job IDs, minutes and cost is [`docs/RUNS.md`](https://github.com/Maadhi21/onegap/blob/main/docs/RUNS.md) in the repository.
 
@@ -374,7 +413,7 @@ The full log with job IDs, minutes and cost is [`docs/RUNS.md`](https://github.c
 
 ### 7.7 Cost
 
-About $17 of our $20 Hugging Face credit, all on HF Jobs (L4 at $0.80 an hour, L40S at $1.80), plus 898 calls
+About $18 of our $20 Hugging Face credit by our own ledger (the platform appears to have stopped us at the full $20), all on HF Jobs (L4 at $0.80 an hour, L40S at $1.80), plus 898 calls
 on a Cohere trial key. Nothing ran on a local GPU.
 
 | Stage | Cost |
@@ -385,6 +424,7 @@ on a Cohere trial key. Nothing ran on a local GPU.
 | Circuit discovery and cross-check | about $1.8 |
 | Training D, E, R, with smokes | about $5.4 |
 | Dev evaluation of the base model, the three adapters and the controls | about $2.8 |
+| Held-out audit: smoke, S0 on test, and the cancelled A run | about $1.2 by our ledger |
 
 One evaluation of one condition on dev (456 conversations, 1,312 assistant turns, every turn judged twice for
 three of the four languages) takes 31 to 34 minutes on an L4: about $0.45. Generation is under half of that;
@@ -394,9 +434,10 @@ that table yet.
 
 ### 7.8 Limits of this version
 
-- **Dev only.** The dev attacks come from the same family as the training attacks (different behaviours). The
-  held-out family is the test set, which is not frozen.
-- **Small n.** 40 conversations per language. Most intervals are wide and several differences are within noise.
+- **Only the single-prompt audit ran on the held-out family.** A (the full conversation), B, D, E and R have dev
+  results only, and the dev attacks come from the same family as the training attacks (different behaviours).
+- **Small n.** 40 conversations per language on dev, 83 to 100 on test. Most intervals are wide and several
+  differences are within noise.
 - **One seed** for every adapter.
 - **One judge family**, not yet checked by humans.
 - **Replayed attacks only.** The user turns are fixed; a live attacker who adapts to the model's replies is a
@@ -405,7 +446,8 @@ that table yet.
   write. Hinglish is model-written and human review is still open.
 - **No capability check yet.** We have not measured whether the adapters cost anything on ordinary tasks.
 - **Missing rows.** The guard model and steering are not in the tables.
-- **No working repair yet.** Version 1 is an audit and a negative result.
+- **No working repair yet.** This version is an audit, replicated on a held-out attack family, and a negative
+  result for the repairs.
 
 ### 7.9 Feedback for the Lexsi toolkits
 
@@ -425,7 +467,7 @@ Found while building this; we will file them as issues.
 | What we would run | Why | What it adds |
 |---|---|---|
 | The repair, revised: a learning-rate sweep on the all-layer arm, then D, E and R at the chosen value (about $8) | The first recipe did not move the model, so the circuit question is still open | A repair that beats the base model, or a second, stronger null; E against R as a real test |
-| The locked test run on the held-out attack family, all conditions, four languages (about $9) | It is the result; dev is a rehearsal | Test-set table with 100 behaviours per language |
+| The full conversation (A) on the frozen held-out set, then the defences (B, D, E, R and the revised repair), four languages (about $10) | Only the single prompt is on test; the run of A was cut off | The multi-turn uplift and the defence results on a different attack family, 83 to 100 behaviours per language |
 | The base model run twice on the test set | Two runs of one condition disagree on about 4% of labels | The size of the harness noise next to every difference |
 | A second and third seed for D, E and R | One seed cannot separate E from R when they are close | Seed-to-seed spread next to every difference |
 | The guard model and steering on the same conversations | The prompt did nothing; a guard on every user turn is the next thing a team would try | Whether an adapter is worth it at all |

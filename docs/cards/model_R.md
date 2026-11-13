@@ -19,7 +19,7 @@ pipeline_tag: text-generation
 
 # OneGap R: random-layer control LoRA for Tiny Aya Global
 
-> **First version. Development-set results only.** Not yet tested on the held-out attack family, one seed, no capability check, and the judge has not been audited by humans. Do not rely on this adapter as a safety control.
+> **Development-set results for this adapter.** The held-out attack family (frozen test set) was run for the single-prompt control (S0) only, not for the adapters (compute budget). One seed, no capability check, and the judge has not been audited by humans. Do not rely on any adapter here as a safety control.
 
 A LoRA adapter for `CohereLabs/tiny-aya-global` trained with DPO to refuse multi-turn jailbreaks in English, Hindi and Hinglish (romanized Hindi-English) while still answering harmless questions. It trains 9 attention and 9 MLP blocks drawn at random (seed 13), disjoint from E's: 63 projections, 7,557,120 trainable parameters, 0.23% of the model.
 
@@ -94,7 +94,7 @@ The base model is gated: accept its terms on the Hub first. All our numbers were
 ## Limits
 
 - Evaluated on replayed attacks with fixed user turns. A live attacker who adapts is a harder test.
-- Dev attacks come from the same family as the training attacks (different behaviours). The held-out family is the test set, not yet run.
+- Dev attacks come from the same family as the training attacks (different behaviours). The held-out family is the frozen test set, run for the base model's single-prompt control only, not for this adapter.
 - One seed. Small n: read the intervals, not the point estimates.
 - Two runs of the same condition differ on about 4% of turn labels, so small differences are noise.
 - One judge family (Llama Guard 3), not yet checked against human labels.

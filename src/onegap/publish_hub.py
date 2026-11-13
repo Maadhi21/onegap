@@ -216,6 +216,8 @@ def main(args) -> int:
 
         api = HfApi()
         private = not args.public
+        for t in targets:
+            t["message"] = getattr(args, "message", None) or "OneGap: first public version"
         manifest["uploaded"] = upload(api, targets, private)
         manifest["collections"] = collections(api, args.org, targets, private)
         print(f"[publish-hub] uploaded {len(targets)} repos, private={private}; collections: "

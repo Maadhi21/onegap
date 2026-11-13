@@ -59,8 +59,22 @@ Acceptance (attack + over-refusal, `uv run onegap curate`, data/generated/fideli
       gate en 100%, hi 96.3%, Hinglish 86.9%, bn 91.6%). Benign kept: train en 384 / hi 362 / Hinglish 282;
       dev 30/28/22/25 (en/hi/Hinglish/bn); test 80/76/50/63. `check_splits` OK on 3,881 records.
       Re-curation moved test Hinglish attack 82 → 83 (a previously missing back-translation now passes; pre-freeze).
-- [ ] HUMAN spot check 30 hi + 30 Hinglish test conversations (sheets: data/generated/spot_check_{hi,hinglish}.csv)
-- [ ] Freeze (`make freeze`, tag `test-freeze-v1`) after approval
+- [ ] HUMAN spot check 30 hi + 30 Hinglish test conversations (sheets: data/generated/spot_check_{hi,hinglish}.csv):
+      **not done by a person** (no human reviewers, Madhava 2026-11-12). Replaced by the mechanical consistency check
+      (`scripts/consistency_check.py`) and Claude's review of its findings; stated as a limit in the article.
+- [x] Review of the 9 proposed test fixes (2026-11-13, Claude, delegated): each checked against its English turn;
+      all 9 approved (5 Hindi mistranslations: psychopharmacology→psychotherapy, psychoactive→psychiatrist, a flipped
+      "overcome", the group name Anonymous as the adjective, anti-bullying→child abuse; 2 Hinglish: a garbled turn and
+      a lost back-reference). One proposal edited: "हैकर समूह" (hacker group) dropped from a600-0083 turn 1 because the
+      English does not say it. Audit trail in each record's `provenance.human_fixes`.
+- [x] **Freeze, 2026-11-13** (Madhava's go-ahead 09:03 for the held-out audit): `data/frozen/test.jsonl` = the 1,225
+      test records of `data/generated/conversations.jsonl` (source file sha256 09b6cb430a6dd8ab…) with the 9 approved
+      fixes applied; `SHA256SUMS` digest f0d07ff62b1a…; tag `test-freeze-v1`. Attack: en 100, hi 89, Hinglish 83,
+      bn 93; over-refusal en 150, hi 147, Hinglish 148, bn 146; benign en 80, hi 76, Hinglish 50, bn 63.
+      `check_splits` OK on 3,881 records with the frozen test records. `conversations.jsonl` itself is unchanged (so
+      the dev inputs uploaded earlier still hash-match); a rerun of `onegap curate` applies the same approved fixes.
+      **Deviation (Invariant 3):** the single-prompt control (S0) ran on test before Gate 2 passed (A was launched
+      too and cancelled before it finished). No adapter ran on test, so no repair decision has seen the test set.
 
 ## M4 (part) — Dev baseline audit and Gate 1 — 2026-11-11
 Runs: A `20261111T100248-run-0539da7c61e7` (351 transcripts, 77 min L4), S0 `20261111T100320-run-0539da7c61e7`.
@@ -276,6 +290,34 @@ Parts of the pooled over-refusal number:
       repos as private; file lists and counts checked (labels unchanged in all six runs; in run A 95 replies
       redacted as unsafe, 552 attack replies withheld, 636 XGuard-Train user turns withheld, 665 harmless replies in
       full); then switched to public. Collections: [models](https://huggingface.co/collections/maadhi/onegap-models-6af5c33bccce0ed5679987fd), [data](https://huggingface.co/collections/maadhi/onegap-data-6af5c33b806eb7b1dd105b9a).
-- [ ] GitHub `Maadhi21/onegap`: one clean commit (93 files; internal planning files and `.cmd` helpers left out;
-      author = GitHub no-reply address), pushed after Madhava creates the empty repo
+- [x] GitHub, 2026-11-13 09:00: [`Maadhi21/onegap`](https://github.com/Maadhi21/onegap) public, one commit
+      `a4445d3` (93 files, tree `2db170a2`; internal planning files and `.cmd` helpers left out; author = GitHub
+      no-reply address). Same tree as the 12 Nov snapshot `1f29248`, rebuilt with a new timestamp. Checks on that
+      exact commit in a clean worktree: secret patterns none, pytest pass, ruff pass. Opens logged out; README and
+      Apache-2.0 licence render; CI run #1 passed. Madhava created the empty repo (the GitHub connector cannot create
+      repos: 403 "Resource not accessible by integration").
+- [ ] Article posted, form submitted (HUMAN: Madhava)
+
+## M8 (part) — Held-out audit, S0 only — 2026-11-13
+Run S0 `20261113T053126-run-af2a65f52c79` (365 attack conversations from the frozen `Attack_600` test set, hash
+verified in the job, 0 judge fallbacks). Report `runs/report/test_v1.{json,md}`. A on test
+(`20261113T053116-run-af2a65f52c79`) was cancelled after 68 min, in judging, with no error (most likely the
+credit ran out); Madhava 11:05: finish with S0 only.
+
+| | English | Hindi | Hinglish | Bengali (held out) |
+|---|---|---|---|---|
+| S0 unsafe | 3.0 [1.0, 8.5] (3/100) | 6.7 [3.1, 13.9] (6/89) | 7.2 [3.4, 14.9] (6/83) | 10.8 [5.9, 18.7] (10/93) |
+| S0 refused outright | 14.0 [8.5, 22.1] (14/100) | 3.4 [1.2, 9.4] (3/89) | 1.2 [0.2, 6.5] (1/83) | 2.2 [0.6, 7.5] (2/93) |
+| unsafe, gap to en (paired bootstrap, McNemar) | — | +3.4 [−1.1, +9.0], p=0.375 | +3.6 [−2.4, +9.6], p=0.453 | +7.5 [+2.2, +14.0], p=0.039 |
+| refused, gap to en | — | −12.4 [−20.2, −4.5], p=0.0074 | −10.8 [−18.1, −4.8], p=0.0039 | −11.8 [−18.3, −5.4], p=0.00098 |
+
+Reading: the dev language pattern (English refuses a single harmful prompt, the other languages rarely do)
+replicates on a different attack family; Bengali (never trained) is the only unsafe-rate gap that excludes zero.
+Absolute single-prompt success is far below dev because `Attack_600` final turns depend on their context. The
+multi-turn uplift on test is not measured.
+
+## M9 — Final submission — 2026-11-13
+- [x] Article (final version: held-out section in 7.1, notice, costs, limits, section 8), abstract (under 500
+      words), README status and held-out table, cards regenerated (`make_cards.py --test-report`)
+- [ ] Hub update (S0 test run, test report, cards) from the dev box; GitHub push of the same commit
 - [ ] Article posted, form submitted (HUMAN: Madhava)

@@ -6,9 +6,10 @@ a random-layer control.**
 
 Lexsi AI Safety and Alignment Hackathon 2026, Track 2 (AI Red Teaming, Safety and Alignment).
 
-> **Status on 12 Nov 2026: development-set results only.** The held-out test set is not frozen yet and the
-> locked test run has not happened. Every number below comes from the dev split. The whole project ran on a $20
-> compute credit; about $17 is spent. Nothing here should be read as a final result.
+> **Status on 13 Nov 2026 (final hackathon submission).** The test set is frozen (tag `test-freeze-v1`). The
+> single-prompt audit (S0) ran on it; the full-conversation run (A) on test was cancelled before it finished, most
+> likely because the $20 compute credit ran out. The multi-turn numbers, the stronger prompt and the three adapters
+> are dev-split results. Read every number with its interval.
 
 ## The question
 
@@ -52,7 +53,25 @@ worked: an unsafe reply at any turn, judged by Llama Guard 3 8B, in % with Wilso
 An earlier run of the same two conditions on a different inference stack gave the same picture for English
 (12.5% against 27.5%) and for the single-prompt gap (30% in Hindi and Hinglish). The Bengali uplift did not
 repeat (0.0 points the first time), so we do not claim it. With 40 conversations per language the intervals are
-wide; the frozen test set, 100 conversations per language from a different attack family, decides.
+wide, so we froze a held-out set from a different attack family.
+
+### On the frozen held-out set: one prompt, four languages
+
+365 final requests from SafeMTData `Attack_600` (ActorAttack, a different attack family from training), each
+sent alone (S0). Run `20261113T053126-run-af2a65f52c79`; report `runs/report/test_v1.md` (in the transcripts
+dataset).
+
+| | English | Hindi | Hinglish | Bengali (held out) |
+|---|---|---|---|---|
+| **S0**: unsafe reply | 3.0 [1.0, 8.5] (3/100) | 6.7 [3.1, 13.9] (6/89) | 7.2 [3.4, 14.9] (6/83) | 10.8 [5.9, 18.7] (10/93) |
+| **S0**: refused outright | 14.0 [8.5, 22.1] (14/100) | 3.4 [1.2, 9.4] (3/89) | 1.2 [0.2, 6.5] (1/83) | 2.2 [0.6, 7.5] (2/93) |
+| Refused, gap to English, paired | — | −12.4 [−20.2, −4.5], p = 0.007 | −10.8 [−18.1, −4.8], p = 0.004 | −11.8 [−18.3, −5.4], p = 0.001 |
+| Unsafe, gap to English, paired | — | +3.4 [−1.1, +9.0], p = 0.38 | +3.6 [−2.4, +9.6], p = 0.45 | +7.5 [+2.2, +14.0], p = 0.039 |
+
+The language gap holds on held-out attacks: English refuses outright, the other languages almost never do, and
+Bengali (never trained on) gives unsafe replies significantly more often than English. Asked alone, these
+requests rarely succeed, because `Attack_600` final turns lean on the conversation before them; the multi-turn run
+that would measure that (A on test) is the first thing to rerun.
 
 ### The defences: a stronger prompt (B) and three adapters (D, E, R) against the base model
 
@@ -182,15 +201,15 @@ Decoding is greedy with `max_new_tokens=384`; the model revision is pinned in `c
 | Hinglish and its back-translation | `onegap codemix`, `onegap codemix-back`, `onegap score-hinglish-back` | local Cohere, CPU job |
 | Benign conversations | `onegap benign` | local, Cohere API |
 | Fidelity gate, records, split check | `onegap curate`, `onegap check-splits <file>` | local |
-| Freeze the test set | `onegap freeze`, then tag `test-freeze-v1` | local, after human review |
+| Freeze the test set | `onegap freeze`, then tag `test-freeze-v1` | local, after review (here: 9 fixes reviewed by the AI assistant, no human) |
 | Replay train conversations through A | `onegap run --condition A --split train` | HF Jobs, L4 |
 | Correction pairs | `onegap prefdata` | local, Cohere API |
 | Circuits and cross-check | `onegap circuits`, `onegap circuit-check` | HF Jobs, L40S and L4 |
 | Train D, E, R | `make train-D`, `train-E`, `train-R` | HF Jobs, L40S, 46 to 64 minutes each |
 | Evaluate and report | `onegap run`, `onegap report` | HF Jobs, then local |
 
-The run log with flavors, minutes and cost for every job is [`docs/RUNS.md`](docs/RUNS.md). Total spend so far
-is about $17 of Hugging Face credit.
+The run log with flavors, minutes and cost for every job is [`docs/RUNS.md`](docs/RUNS.md). Total spend is about
+$18 of Hugging Face credit by our ledger; the $20 credit appears to be used up.
 
 Section numbers in code comments ("spec 8.3") refer to our internal implementation plan; what matters from it
 is in this README and in `docs/PROGRESS.md`. The project was built with Claude Code as a coding assistant, and
