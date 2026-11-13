@@ -10,4 +10,6 @@ jobs:
       - run: uv run ruff check src tests scripts
       - run: uv run pytest
       - name: frozen test set unchanged
-        run: if [ -f data/frozen/SHA256SUMS ]; then uv run onegap verify-frozen; fi
+        # The public snapshot ships SHA256SUMS but not test.jsonl (test prompts are not in the public repo), so
+        # the hash check runs only where the frozen file itself is present (the private repo).
+        run: if [ -f data/frozen/SHA256SUMS ] && [ -f data/frozen/test.jsonl ]; then uv run onegap verify-frozen; else echo "frozen test file not in this checkout; hashes listed in data/frozen/SHA256SUMS"; fi
