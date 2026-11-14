@@ -33,7 +33,7 @@ three pre-registered LoRA-DPO repairs, including one aimed at that circuit, did 
 >   0.69 in English and 0.36 in Hindi. (5) The repair experiment is built and pre-registered; the first recipe was
 >   too weak to move the model, and the $200 run answers the circuit question.
 >
-> Links: [model collection](https://huggingface.co/collections/maadhi/onegap-models-6af5c33bccce0ed5679987fd) · [dataset collection](https://huggingface.co/collections/maadhi/onegap-data-6af5c33b806eb7b1dd105b9a) · [code](https://github.com/Maadhi21/onegap)
+> Links: [model collection](https://huggingface.co/collections/maadhi/onegap-models-6af5c33bccce0ed5679987fd) · [dataset collection](https://huggingface.co/collections/maadhi/onegap-data-6af5c33b806eb7b1dd105b9a) · [code](https://github.com/Maadhi21/onegap) · [replay Space](https://huggingface.co/spaces/maadhi/onegap-replay) · [reproduction notebook](https://github.com/Maadhi21/onegap/blob/main/notebooks/reproduce_headline.ipynb)
 
 ## Abstract
 
@@ -411,7 +411,9 @@ no arm beats the base model, so we do not read this as evidence for or against t
 | HF models collection | [maadhi/onegap-models](https://huggingface.co/collections/maadhi/onegap-models-6af5c33bccce0ed5679987fd): [E circuit LoRA](https://huggingface.co/maadhi/onegap-tiny-aya-global-circuit-lora), [D all-layer LoRA](https://huggingface.co/maadhi/onegap-tiny-aya-global-plain-lora), [R random-block LoRA](https://huggingface.co/maadhi/onegap-tiny-aya-global-random-lora) |
 | HF datasets collection | [maadhi/onegap-data](https://huggingface.co/collections/maadhi/onegap-data-6af5c33b806eb7b1dd105b9a): [transcripts, labels, logs and reports for every run](https://huggingface.co/datasets/maadhi/onegap-transcripts-and-logs), [circuits and the SafeTune cross-check](https://huggingface.co/datasets/maadhi/onegap-circuits) |
 | GitHub repo | [Maadhi21/onegap](https://github.com/Maadhi21/onegap) |
-| Demo, video | None |
+| Demo / Space | [maadhi/onegap-replay](https://huggingface.co/spaces/maadhi/onegap-replay): pick a split, language and conversation and replay it turn by turn with its safety labels (redacted as in the dataset) |
+| Reproduction notebook | [`notebooks/reproduce_headline.ipynb`](https://github.com/Maadhi21/onegap/blob/main/notebooks/reproduce_headline.ipynb): rebuilds the dev and held-out reports from the published runs on CPU, checks them against the published reports and redraws the figures |
+| Video | None |
 
 Everything is public and un-gated; adapters are CC-BY-NC 4.0 (inherited from Tiny Aya), code Apache-2.0.
 
@@ -434,7 +436,7 @@ uv run --extra local python scripts/launch_job.py run --flavor l4x1 --venv vllm 
     -- --condition A --split test --limit 4                                     # one evaluation, smoke first
 ```
 
-Full steps, from data building to training: [README](https://github.com/Maadhi21/onegap#reproduce).
+Or open [`notebooks/reproduce_headline.ipynb`](https://github.com/Maadhi21/onegap/blob/main/notebooks/reproduce_headline.ipynb), which rebuilds the headline tables from the published runs on CPU. Full steps, from data building to training: [README](https://github.com/Maadhi21/onegap#reproduce).
 
 **Declaration of work done outside the hackathon.** None. All code, data, runs and writing were done during the
 hackathon, 1 to 14 November 2026.
@@ -452,7 +454,7 @@ coding assistant (Claude) working under the team's direction: roughly 80 to 90% 
 The team set the question, the decision rule and the budget, and reviewed the results; every number comes from
 the published runs.
 
-**Changelog.** v1, 12 Nov: dev results. 13 Nov: test set frozen, held-out single-prompt audit, story rewrite.
+**Changelog.** v1, 12 Nov: dev results. 13 Nov: test set frozen, held-out single-prompt audit, story rewrite, reproduction notebook and replay Space.
 14 Nov: leak check, metric directions, cost-to-break, threat model, settings per kit, ethics and reproduction
 sections.
 
